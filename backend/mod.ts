@@ -4,6 +4,3 @@ export { default as MessageBoxTopicDocs } from './src/topic-managers/MessageBoxT
 
 // Lookup Service
 export { default as MessageBoxLookupServiceFactory } from './src/lookup-services/MessageBoxLookupService.js'
-
-// Types
-export * from './src/types.js'
