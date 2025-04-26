@@ -11,7 +11,13 @@
  */
 
 import { LookupFormula } from '@bsv/overlay'
+import { PubKeyHex } from '@bsv/sdk'
 import { Collection, Db } from 'mongodb'
+
+export interface MessageBoxQuery {
+  identityKey: PubKeyHex
+  host?: string
+}
 
 /**
  * Handles all database operations for storing and querying MessageBox overlay advertisements.
@@ -62,17 +68,23 @@ export class MessageBoxStorage {
   }
 
   /**
-   * Finds all known lookup records for a given identity key,
-   * ordered by recency.
-   *
-   * @param identityKey - The identity key to look up.
-   * @returns An array of LookupFormula objects ordered by createdAt desc.
-   */
-  async findHostsForIdentity(identityKey: string): Promise<LookupFormula> {
+  * Finds all known lookup records for a given identity key, and optionally a host,
+  * ordered by recency.
+  *
+  * @param identityKey - The identity key to look up.
+  * @param host - The host to filter by (optional).
+  * @returns An array of LookupFormula objects ordered by createdAt desc.
+  */
+  async findAdvertisements(identityKey: string, host?: string): Promise<LookupFormula> {
+    const filter: MessageBoxQuery = { identityKey }
+    if (host !== undefined) {
+      filter.host = host
+    }
+
     const cursor = this.adsCollection
-      .find({ identityKey })
+      .find(filter)
       .project({ txid: 1, outputIndex: 1 })
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: -1 });
 
     const results = await cursor.toArray()
     return results.map(doc => ({

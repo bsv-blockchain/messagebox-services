@@ -18,7 +18,7 @@ import {
   LookupFormula
 } from '@bsv/overlay'
 
-import { MessageBoxStorage } from './MessageBoxStorage.js'
+import { MessageBoxQuery, MessageBoxStorage } from './MessageBoxStorage.js'
 import { PushDrop, Script, Utils } from '@bsv/sdk'
 import docs from '../lookup-services/MessageBoxLookupDocs.md.js'
 import { Db } from 'mongodb'
@@ -115,13 +115,13 @@ class MessageBoxLookupService implements LookupService {
       throw new Error('Unsupported lookup service')
     }
 
-    const query = question.query as { identityKey: string }
+    const query = question.query as MessageBoxQuery
 
     if (!query?.identityKey) {
       throw new Error('identityKey query missing')
     }
 
-    return await this.storage.findHostsForIdentity(query.identityKey)
+    return await this.storage.findAdvertisements(query.identityKey, query.host)
   }
 
   /**
