@@ -1,15 +1,27 @@
 # MessageBox Overlay Services
 
-Standard BSV project structure.
+The MessageBox Overlay Services provide decentralized, public advertisement of MessageBox hosts in the Bitcoin SV ecosystem.
+They enable peer-to-peer message routing across different servers by:
+
+- Broadcasting identity-to-host mappings over the [@bsv/overlay](https://www.npmjs.com/package/@bsv/overlay) SHIP protocol
+- Allowing clients to discover where a recipient's message box is hosted, even if it's on a different server
+- Providing a LookupService for resolving overlay advertisements
+
+This system is critical for supporting decentralized messaging where users are not restricted to a single server.
+The overlay services are designed to be lightweight, highly available, and easily deployed to multiple hosts for redundancy.
+
 
 Helpful Links:
 
 - [LARS (for local development)](https://github.com/bitcoin-sv/lars)
 - [CARS CLI (for cloud deployment)](https://github.com/bitcoin-sv/cars-cli)
 - [RUN YOUR OWN CARS NODE](https://github.com/bitcoin-sv/cars-node)
+- [@bsv/overlay](https://www.npmjs.com/package/@bsv/overlay)
 - [Specification for deployment-info.json](https://github.com/bitcoin-sv/BRCs/blob/master/apps/0102.md)
 
 ## Getting Started
+
+This project uses the LARS (local) and CARS (cloud) toolchains to simplify deployment and management of overlay services.
 
 - Clone this repository
 - Run `npm i` to install dependencies
