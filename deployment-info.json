@@ -28,6 +28,16 @@
       "deploy": [
         "backend"
       ]
+    },
+    {
+      "name": "messagebox-testnet",
+      "provider": "CARS",
+      "CARSCloudURL": "https://cars.babbage.systems",
+      "projectID": "a8c9fcbf437e64d3fe146e8960b16584",
+      "network": "testnet",
+      "deploy": [
+        "backend"
+      ]
     }
   ]
 }
