@@ -65,7 +65,7 @@ class MessageBoxLookupService implements LookupService {
 
   async outputSpent(payload: OutputSpent): Promise<void> {
     if (payload.mode !== 'none') throw new Error('Invalid payload')
-      const { txid, outputIndex, topic } = payload
+    const { txid, outputIndex, topic } = payload
     if (topic === 'tm_messagebox') {
       await this.storage.deleteRecord(txid, outputIndex)
     }
@@ -78,7 +78,7 @@ class MessageBoxLookupService implements LookupService {
     await this.storage.deleteRecord(txid, outputIndex)
   }
 
-  async lookup(question: LookupQuestion): Promise<LookupAnswer | LookupFormula> {
+  async lookup(question: LookupQuestion): Promise<LookupFormula> {
     if (question.service !== 'ls_messagebox') {
       throw new Error('Unsupported lookup service')
     }
