@@ -39,78 +39,94 @@ export default class MessageBoxTopicManager implements TopicManager {
     previousCoins: number[]
   ): Promise<AdmittanceInstructions> {
     const outputsToAdmit: number[] = []
+    const coinsToRetain: number[] = []
+    const coinsRemoved: number[] = []
 
-    const tx = Transaction.fromBEEF(beef)
+    try {
+      const tx = Transaction.fromBEEF(beef)
 
-    console.log(`[TOPIC MANAGER] Decoding transaction with ${tx.outputs.length} outputs`)
+      console.log(`[TOPIC MANAGER] Decoding transaction with ${tx.outputs.length} outputs`)
 
-    for (const [i, output] of tx.outputs.entries()) {
-      try {
-        const result = PushDrop.decode(output.lockingScript)
-        console.log(`[OUTPUT ${i}] PushDrop decoded fields count: ${result.fields.length + 1}`)
-
-        // Extract signature (last field), and rest are data
-        const signature = result.fields.pop() as number[]
-        const [identityKeyBuf, hostBuf] = result.fields
-
-        console.log(`[OUTPUT ${i}] Raw Buffers:`, {
-          identityKeyBuf,
-          hostBuf,
-          signature
-        })
-
-        // Basic admissibility checks before processing
-        if (
-          !identityKeyBuf || !hostBuf || identityKeyBuf.length === 0 || hostBuf.length === 0
-        ) {
-          console.warn(`[ADMISSIBILITY] Output ${i} skipped due to empty field(s)`)
-          continue
-        }
-
-        let host: string
+      for (const [i, output] of tx.outputs.entries()) {
         try {
-          host = Utils.toUTF8(hostBuf)
-          console.log(`[OUTPUT ${i}] Decoded host:`, { host })
-        } catch {
-          console.warn(`[ADMISSIBILITY] Output ${i} skipped due to UTF-8 decoding failure`)
-          continue
+          const result = PushDrop.decode(output.lockingScript)
+          console.log(`[OUTPUT ${i}] PushDrop decoded fields count: ${result.fields.length + 1}`)
+
+          // Extract signature (last field), and rest are data
+          const signature = result.fields.pop() as number[]
+          const [identityKeyBuf, hostBuf] = result.fields
+
+          console.log(`[OUTPUT ${i}] Raw Buffers:`, {
+            identityKeyBuf,
+            hostBuf,
+            signature
+          })
+
+          // Basic admissibility checks before processing
+          if (
+            !identityKeyBuf || !hostBuf || identityKeyBuf.length === 0 || hostBuf.length === 0
+          ) {
+            console.warn(`[ADMISSIBILITY] Output ${i} skipped due to empty field(s)`)
+            continue
+          }
+
+          let host: string
+          try {
+            host = Utils.toUTF8(hostBuf)
+            console.log(`[OUTPUT ${i}] Decoded host:`, { host })
+          } catch {
+            console.warn(`[ADMISSIBILITY] Output ${i} skipped due to UTF-8 decoding failure`)
+            continue
+          }
+
+          const identityKey = Utils.toHex(identityKeyBuf)
+          const data = result.fields.reduce((a, e) => [...a, ...e], [])
+
+          console.log(`[OUTPUT ${i}] Verifying signature using:`, {
+            data,
+            signature,
+            counterparty: identityKey,
+            protocolID: [1, 'messagebox advertisement'],
+            keyID: '1'
+          })
+
+          const { valid } = await anyoneWallet.verifySignature({
+            data,
+            signature,
+            counterparty: identityKey,
+            protocolID: [1, 'messagebox advertisement'],
+            keyID: '1'
+          })
+
+          if (valid) {
+            console.log(`[SIGNATURE] Output ${i} PASSED signature check`)
+            outputsToAdmit.push(i)
+          } else {
+            console.warn(`[SIGNATURE] Output ${i} FAILED signature verification`)
+          }
+        } catch (e) {
+          console.warn(`[DECODE ERROR] Skipping output ${i} due to exception:`, e)
         }
-
-        const identityKey = Utils.toHex(identityKeyBuf)
-        const data = result.fields.reduce((a, e) => [...a, ...e], [])
-
-        console.log(`[OUTPUT ${i}] Verifying signature using:`, {
-          data,
-          signature,
-          counterparty: identityKey,
-          protocolID: [1, 'messagebox advertisement'],
-          keyID: '1'
-        })
-
-        const { valid } = await anyoneWallet.verifySignature({
-          data,
-          signature,
-          counterparty: identityKey,
-          protocolID: [1, 'messagebox advertisement'],
-          keyID: '1'
-        })
-
-        if (valid) {
-          console.log(`[SIGNATURE] Output ${i} PASSED signature check`)
-          outputsToAdmit.push(i)
-        } else {
-          console.warn(`[SIGNATURE] Output ${i} FAILED signature verification`)
-        }
-      } catch (e) {
-        console.warn(`[DECODE ERROR] Skipping output ${i} due to exception:`, e)
       }
-    }
 
-    console.log(`[TOPIC MANAGER] Outputs to admit:`, outputsToAdmit)
+      console.log(`[TOPIC MANAGER] Outputs to admit:`, outputsToAdmit)
 
-    return {
-      outputsToAdmit,
-      coinsToRetain: previousCoins
+      // Advertisement coins are never retained — whether this is a revocation (no new
+      // outputs) or a re-anointment (new output replacing the old), the spent input
+      // should always be removed so outputSpent fires and deleteRecord cleans up the DB.
+      coinsRemoved.push(...previousCoins)
+
+      return {
+        outputsToAdmit,
+        coinsToRetain,
+        coinsRemoved
+      }
+    } catch (error) {
+      return {
+        outputsToAdmit: [],
+        coinsToRetain: [],
+        coinsRemoved: []
+      }
     }
   }
 
