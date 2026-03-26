@@ -14,7 +14,6 @@
 import {
   LookupService,
   LookupQuestion,
-  LookupAnswer,
   LookupFormula,
   AdmissionMode,
   SpendNotificationMode,
@@ -49,8 +48,6 @@ class MessageBoxLookupService implements LookupService {
         identityKey: Utils.toHex(identityKeyBuf),
         host: Utils.toUTF8(hostBuf)
       };
-
-      console.log('[LOOKUP] Decoded advertisement:', ad);
 
       await this.storage.storeRecord(
         ad.identityKey,
