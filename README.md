@@ -7,7 +7,7 @@ They enable peer-to-peer message routing across different servers by:
 - Allowing clients to discover where a recipient's message box is hosted, even if it's on a different server
 - Providing a LookupService for resolving overlay advertisements
 
-This system is critical for supporting decentralized messaging where users are not restricted to a single server.
+This system is critical for supporting **decentralized** messaging where users are not restricted to a single server.
 The overlay services are designed to be lightweight, highly available, and easily deployed to multiple hosts for redundancy.
 
 
