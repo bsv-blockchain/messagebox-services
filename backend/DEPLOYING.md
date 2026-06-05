@@ -30,7 +30,7 @@ This overlay service is meant to be plugged into LARS using deployment-info.json
 **Step 1:** Install and Run LARS
 Follow setup instructions for LARS:
 ```bash
-npm install -g @bsv/lars
+npm install -g @p2ppsr/lars
 mkdir my-overlay-project && cd my-overlay-project
 lars init
 ```
