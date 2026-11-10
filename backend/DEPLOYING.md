@@ -121,7 +121,7 @@ ________________________________________
 - Overlay-aware apps built using SHIP & Babbage
 ________________________________________
 ### License
-This code is licensed under the [Open BSV License](https://www.bsvlicense.org/).
+This code is licensed under the [Apache License 2.0](../LICENSE).
 ________________________________________
 
 
