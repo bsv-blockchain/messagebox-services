@@ -64,4 +64,4 @@ The one constant is `deployment-info.json`.
 
 ## License
 
-[Open BSV License](./LICENSE.txt)
+[Apache License 2.0](LICENSE)
